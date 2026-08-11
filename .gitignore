@@ -1,0 +1,27 @@
+.env
+/vendor
+/node_modules
+/.idea
+/.vscode
+/public/storage
+/storage/*.key
+Homestead.json
+Homestead.yaml
+/.phpunit.result.cache
+
+# Laravel Mix
+/public/hot
+/public/mix-manifest.json
+
+# SASS
+.sass-cache
+
+# Mac
+.DS_Store
+
+# Logs
+/storage/logs/*.log
+
+# IDE
+/.idea
+/.vscode
