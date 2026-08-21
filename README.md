@@ -1,20 +1,97 @@
-# Neumáticos - Sistema de Inventario
+# 🛞 Control de Neumáticos y Llantas
 
-Repositorio para la aplicación de control de inventario de neumáticos y llantas por sucursal e inventario general.
+Sistema MVP en Laravel (PHP) para el control de neumáticos y llantas con autenticación y roles.
 
-MVP:
-- Gestión de sucursales
-- Catálogo de productos (neumáticos y llantas)
-- Inventarios por sucursal y consolidado
-- Movimientos e historial (ingreso/salida/ajuste/transferencia)
-- Import/Export CSV
-- Autenticación y roles
+## Características
 
-Stack recomendado: Laravel 10 + PostgreSQL + Vue 3 (Inertia) - opción por defecto, podemos cambiar si prefieres otro stack.
+- **Autenticación** con login por correo y contraseña
+- **4 roles**: `admin`, `slw`, `qet`, `butc`
+- **Redirección automática** post-login según rol
+- **CRUD de neumáticos** con filtro por área
+- **Middleware de roles** para proteger rutas
 
-Siguientes pasos:
-1. Crear scaffold de Laravel con Docker y configuración base.
-2. Crear migraciones y modelos: branches, products, branch_inventories, inventory_movements, users/roles.
-3. Implementar endpoints API y frontend inicial.
+## Roles y Acceso
 
-Branch propuesta para desarrollo: feature/scaffold-inventario
+| Usuario | Contraseña | Rol | Acceso |
+|---------|------------|-----|--------|
+| admin@neumaticos.local | Admin123! | admin | Dashboard admin + todos los neumáticos |
+| slw@neumaticos.local | Slw123! | slw | Página SLW + neumáticos del área SLW |
+| qet@neumaticos.local | Qet123! | qet | Página QET + neumáticos del área QET |
+| butc@neumaticos.local | Butc123! | butc | Página BUTC + neumáticos del área BUTC |
+
+## Instalación
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/ArmandoCortes19/Neumaticos.git
+cd Neumaticos
+
+# 2. Instalar dependencias PHP
+composer install
+
+# 3. Configurar entorno
+cp .env.example .env
+php artisan key:generate
+
+# 4. Configurar base de datos en .env
+# DB_CONNECTION=sqlite  (o mysql)
+# DB_DATABASE=/ruta/absoluta/database.sqlite  (para SQLite)
+
+# 5. Crear archivo SQLite (si usas SQLite)
+touch database/database.sqlite
+
+# 6. Ejecutar migraciones y seeders
+php artisan migrate --seed
+
+# 7. Iniciar servidor
+php artisan serve
+```
+
+Luego visita: http://localhost:8000
+
+## Estructura del Proyecto
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── Auth/LoginController.php    # Login / Logout
+│   │   ├── DashboardController.php     # Redirección por rol
+│   │   └── NeumaticoController.php     # CRUD neumáticos
+│   └── Middleware/
+│       └── RoleMiddleware.php          # Control de acceso por rol
+└── Models/
+    ├── User.php                        # Usuario con campo role
+    └── Neumatico.php                   # Modelo neumático
+
+database/
+├── migrations/
+│   ├── ..._create_users_table.php      # Tabla users + campo role
+│   └── ..._create_neumaticos_table.php # Tabla neumaticos
+└── seeders/
+    └── DatabaseSeeder.php              # 4 usuarios de prueba
+
+resources/views/
+├── auth/login.blade.php
+├── layouts/app.blade.php
+├── admin/index.blade.php
+├── areas/{slw,qet,butc}.blade.php
+└── neumaticos/{index,create,edit,show}.blade.php
+
+routes/web.php                          # Rutas protegidas por auth + role
+bootstrap/app.php                       # Registro del middleware 'role'
+```
+
+## Módulo Neumáticos
+
+Campos:
+- **Código** (único)
+- **Marca**
+- **Medida** (Ej: 275/80R22.5)
+- **Estado**: `nuevo`, `en_uso`, `desgaste`, `baja`
+- **Área**: `slw`, `qet`, `butc`
+- **Observaciones** (opcional)
+
+Reglas de negocio:
+- Admin ve todos los registros y puede asignar área
+- Usuarios SLW/QET/BUTC solo ven y crean en su área
